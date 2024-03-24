@@ -1,40 +1,45 @@
 @extends('layouts.app')
+
 @section('content')
+    <!-- Form for updating a post -->
     <form action="{{ route('Blog.update', $data->id) }}" method="POST" enctype="multipart/form-data"
         class="p-5 rounded-lg shadow-lg bg-light">
         @csrf
         @method('PUT')
-        <h1 class="text-center display-4">Edit</h1>
+
+        <!-- Title -->
         <div class="mb-3">
             <label for="title" class="form-label">Title</label>
-            <input type="text" class="form-control rounded-pill" id="title" name="title"value="{{ $data->title }}">
-        </div>
-        <div>
+            <input type="text" class="form-control rounded-pill" id="title" name="title"
+                value="{{ $data->title }}">
+            <!-- Error message for title validation -->
             @error('Title')
-                <div class="alert alert-danger">{{ $message }}</div>
+                <div class="alert alert-danger mt-2">{{ $message }}</div>
             @enderror
-        </div>
-        <div>
-            <div class="mb-3">
-                <label for="title" class="form-label">Image</label>
-                <input type="file" class="form-control rounded-pill" id="image" name="image">
-            </div>
-            <div>
-                @error('image')
-                    <div class="alert alert-danger">{{ $message }}</div>
-                @enderror
-            </div>
-        </div>
-        <div class="mb-3">
-            <label for="description" class="form-label">Description</label>
-            <textarea class="form-control rounded" id="description" name="description" rows="3">{{ $data->description }}</textarea>
         </div>
 
-        <div>
-            @error('description')
-                <div class="alert alert-danger">{{ $message }}</div>
+        <!-- Image upload -->
+        <div class="mb-3">
+            <label for="title" class="form-label">Image</label>
+            <input type="file" class="form-control rounded-pill" id="image" name="image">
+            <!-- Error message for image validation -->
+            @error('image')
+                <div class="alert alert-danger mt-2">{{ $message }}</div>
             @enderror
         </div>
+
+        <!-- Description -->
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control rounded" id="description" name="description"
+                rows="3">{{ $data->description }}</textarea>
+            <!-- Error message for description validation -->
+            @error('description')
+                <div class="alert alert-danger mt-2">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <!-- Submit button -->
         <button type="submit" class="btn btn-primary">UPDATE</button>
     </form>
 @endsection

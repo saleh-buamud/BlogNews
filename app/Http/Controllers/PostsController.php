@@ -31,6 +31,7 @@ class PostsController extends Controller
      */
     public function store(Request $request)
     {
+        // Validate the request
         $request->validate(
             [
                 'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -45,17 +46,25 @@ class PostsController extends Controller
                 'description.max' => 'The description may not be greater than 530 characters.',
             ],
         );
+
+        // Generate a slug for the title
         $slug = Str::slug($request->title, '-');
-        $newImageName = uniqid() . ' -' . date('Y-m-d_H-i-s') . '-' . $slug . '-' . $request->image->extension();
+
+        // Generate a unique image name based on current timestamp
+        $newImageName = uniqid() . '-' . now()->format('Y-m-d_H-i-s') . '-' . $slug . '.' . $request->image->extension();
+
+        // Move the uploaded image to the public/images directory
         $request->image->move(public_path('images'), $newImageName);
+
+        // Create a new Post instance and save it to the database
         $post = new Post();
         $post->title = $request->title;
         $post->description = $request->description;
-        // $post->image = $newImageName;
         $post->slug = $slug;
         $post->image_path = $newImageName;
         $post->user_id = auth()->user()->id;
         $post->save();
+
         return redirect('/Blog')->with('messageYes', 'Post created successfully');
     }
 
@@ -73,9 +82,8 @@ class PostsController extends Controller
      */
     public function edit($slug)
     {
-        $data = Post::findOrFail($slug);
-
-        return view('blog.edit', compact('data'));
+        $post = Post::findOrFail($slug);
+        return view('blog.edit', compact('post'));
     }
 
     /**
@@ -83,28 +91,34 @@ class PostsController extends Controller
      */
     public function update(Request $request, $id)
     {
+        // Validate the request
         $request->validate([
             'image' => 'required',
             'title' => 'required|max:255',
             'description' => 'required|max:530',
         ]);
+
+        // Generate a slug for the title
         $slug = Str::slug($request->title, '-');
-        $newImageName = uniqid() . ' -' . date('Y-m-d_H-i-s') . '-' . $slug . '-' . $request->image->extension();
+
+        // Generate a unique image name based on current timestamp
+        $newImageName = uniqid() . '-' . now()->format('Y-m-d_H-i-s') . '-' . $slug . '.' . $request->image->extension();
+
+        // Move the uploaded image to the public/images directory
         $request->image->move(public_path('images'), $newImageName);
-        $title = $request->title;
-        $description = $request->description;
-        $image_path = $newImageName;
-        $slug = $slug;
-        $user_id = auth()->user()->id;
+
+        // Update the post in the database
         $post = Post::findOrFail($id);
-        $post->title = $title;
-        $post->description = $description;
-        $post->image_path = $image_path;
+        $post->title = $request->title;
+        $post->description = $request->description;
+        $post->image_path = $newImageName;
         $post->slug = $slug;
-        $post->user_id = $user_id;
+        $post->user_id = auth()->user()->id;
         $post->save();
 
-        return to_route('Blog.show', $post->id)->with('message', 'Post updated successfully');
+        return redirect()
+            ->route('Blog.show', $post->id)
+            ->with('message', 'Post updated successfully');
     }
 
     /**
